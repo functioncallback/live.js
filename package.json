@@ -1,0 +1,23 @@
+{
+  "name": "live.js",
+  "description": "real-time event visualization",
+  "version": "0.0.1",
+  "author": "Wagner Montalvao Camarao <functioncallback@gmail.com>",
+  "homepage": "https://github.com/functioncallback/live.js",
+  "repository": {
+      "type": "git",
+      "url": "git://github.com/functioncallback/live.js.git"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "engines": {
+    "node": "0.4.x"
+  },
+  "dependencies": {
+    "expresso"  : "0.9.x",
+    "should"    : "0.3.x"
+  },
+  "devDependencies": {},
+  "main": "lib/live.js"
+}
