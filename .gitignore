@@ -2,3 +2,5 @@
 .monitor
 node_modules
 npm-debug.log
+public/stylesheets/*.css
+public/javascripts/*.js
