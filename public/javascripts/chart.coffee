@@ -1,3 +1,9 @@
+#
+# live.js
+# Copyright(c) 2011 Wagner Montalvao Camarao <functioncallback@gmail.com>
+# MIT Licensed
+#
+
 chart = undefined
 
 Highcharts.setOptions
@@ -5,7 +11,7 @@ Highcharts.setOptions
 
 $(document).ready ->
   chart = new Highcharts.Chart(
-    
+
     chart:
       renderTo: 'container'
       defaultSeriesType: 'spline'

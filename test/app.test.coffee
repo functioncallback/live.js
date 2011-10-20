@@ -1,123 +1,116 @@
-require.paths.unshift("#{__dirname}/..");
+#
+# live.js
+# Copyright(c) 2011 Wagner Montalvao Camarao <functioncallback@gmail.com>
+# MIT Licensed
+#
 
-it = module.exports
+root = (path) -> "#{__dirname.substr(0, __dirname.length-5)}/lib/..#{path}"
+require.paths.unshift("#{__dirname}/..");
+app = express = expressApp = stylus = nib = nowjs = routes = sockets = null
 should = require 'should'
 $ = require 'mock.js'
 
-express = $.mock require 'express'
-stylus = $.mock require 'stylus'
-nib = $.mock require 'nib'
-nowjs = $.mock require 'now'
-routes = $.mock require 'lib/routes'
-sockets = $.mock require 'lib/sockets'
+it = (statement, callback) ->
+  beforeEach()
+  module.exports[statement] = callback
 
-expectedApp =
+beforeEach = ->
+  express = $.mock require 'express'
+  stylus  = $.mock require 'stylus'
+  nib     = $.mock require 'nib'
+  nowjs   = $.mock require 'now'
+  routes  = $.mock require 'lib/routes'
+  sockets = $.mock require 'lib/sockets'
+  app = require('lib/app').inject express, stylus, nib, nowjs, routes, sockets
+  expressApp = stubExpressApp()
+
+stubExpressApp = ->
   middlewares: []
   settings: {}
-  configure: (env, callback) -> if callback? then callback() else env()
-  use: (middleware) -> middleware? && @middlewares.push middleware
-  set: (key, value) -> @settings[key] = value
-  listen: (port) -> @listening = port
-
-actualApp = ->
-  require('lib/app').inject(express, stylus, nib, nowjs, routes, sockets)
+  envs: {}
+  configure: (env, fn) -> if fn? then @envs[env] = fn; fn() else env()
+  use: (m) -> m? && @middlewares.push m; m
+  set: (k, v) -> @settings[k] = v
+  listen: (p) -> @listening = p
 
 
 
-it['should create app server'] = ->
+it 'should create app', ->
 
-  $.when(express).createServer().thenReturn(expectedApp)
-  app = actualApp()
-  app.should.be.equal expectedApp
-
-
-
-it['should use express logger middleware'] = ->
-
-  $.when(express).logger().thenReturn 'logger'
-  app = actualApp()
-  app.middlewares.should.contain 'logger'
+  $.when(express).createServer().thenReturn expressApp
+  app.createServer().should.be.equal expressApp
 
 
 
-it['should use express bodyParser middleware'] = ->
+it 'should use middlewares', ->
 
-  $.when(express).bodyParser().thenReturn 'bodyParser'
-  app = actualApp()
-  app.middlewares.should.contain 'bodyParser'
+  expressMiddlewares = ['logger', 'bodyParser', 'cookieParser', 'methodOverride', 'compiler', 'static']
+  stylusMiddleware = 'stylus'
 
+  $.when(express).createServer().thenReturn expressApp
+  $.when(express)[m]().thenReturn m for m in expressMiddlewares
+  $.when(stylus).middleware().thenReturn stylusMiddleware
 
+  app.createServer()
+  app.use()
 
-it['should use express cookieParser middleware'] = ->
-
-  $.when(express).cookieParser().thenReturn 'cookieParser'
-  app = actualApp()
-  app.middlewares.should.contain 'cookieParser'
-
-
-
-it['should use express methodOverride middleware'] = ->
-
-  $.when(express).methodOverride().thenReturn 'methodOverride'
-  app = actualApp()
-  app.middlewares.should.contain 'methodOverride'
+  expressApp.middlewares.should.contain m for m in expressMiddlewares
+  expressApp.middlewares.should.contain stylusMiddleware
 
 
 
-it['should use express compiler middleware'] = ->
+it 'should setup views', ->
 
-  $.when(express).compiler().thenReturn 'compiler'
-  app = actualApp()
-  app.middlewares.should.contain 'compiler'
+  $.when(express).createServer().thenReturn expressApp
 
+  app.createServer()
+  app.views()
 
-
-it['should use express static middleware'] = ->
-
-  $.when(express).static().thenReturn 'static'
-  app = actualApp()
-  app.middlewares.should.contain 'static'
+  expressApp.settings['views'].should.be.equal root '/views'
+  expressApp.settings['view options'].layout.should.be.false
+  expressApp.settings['view engine'].should.be.equal 'jade'
 
 
 
-it['should use express errorHandler middleware'] = ->
+it 'should setup errorHandler by environment', ->
 
-  $.when(express).errorHandler().thenReturn 'errorHandler'
-  app = actualApp()
-  app.middlewares.should.contain 'errorHandler'
+  expected = 'errorHandler'
+  $.when(express).createServer().thenReturn expressApp
+  $.when(express).errorHandler().thenReturn expected
 
+  app.createServer()
+  app.envs()
 
-
-it['should use stylus middleware'] = ->
-
-  $.when(stylus).middleware().thenReturn 'stylus middleware'
-  app = actualApp()
-  app.middlewares.should.contain 'stylus middleware'
+  expressApp.envs.development().should.be.equal expected
+  expressApp.envs.production().should.be.equal expected
 
 
 
-it['should inject app into routes module'] = ->
+it 'should eject dependencies', ->
 
-  injected = {}
-  $.when(routes).inject(expectedApp).thenCall -> injected.app = expectedApp
-  app = actualApp()
-  injected.app.should.be.equal expectedApp
+  ejected = {}
+  initStub = {init: ->}
+  $.when(express).createServer().thenReturn expressApp
+  $.when(routes).inject(expressApp).thenCall -> ejected.routesApp = expressApp; initStub
+  $.when(sockets).inject(expressApp, nowjs).thenCall ->
+    ejected.socketsApp = expressApp
+    ejected.socketsNowjs = nowjs
+    initStub
 
+  app.createServer()
+  app.eject()
 
-
-it['should inject app and nowjs into sockets module'] = ->
-
-  injected = {}
-  $.when(sockets).inject(expectedApp, nowjs).thenCall ->
-    injected.app = expectedApp
-    injected.nowjs = nowjs
-  app = actualApp()
-  injected.app.should.be.equal expectedApp
-  injected.nowjs.should.be.equal nowjs
-
+  ejected.routesApp.should.be.equal expressApp
+  ejected.socketsApp.should.be.equal expressApp
+  ejected.socketsNowjs.should.be.equal nowjs
 
 
-it['should listen on port 3000'] = ->
 
-  app = actualApp()
-  app.listening.should.be.equal 3000
+it 'should listen on 3000', ->
+
+  $.when(express).createServer().thenReturn expressApp
+
+  app.createServer()
+  app.listen()
+
+  expressApp.listening.should.be.equal 3000

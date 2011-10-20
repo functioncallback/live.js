@@ -1,5 +1,14 @@
+#
+# live.js
+# Copyright(c) 2011 Wagner Montalvao Camarao <functioncallback@gmail.com>
+# MIT Licensed
+#
+
 module.exports = inject: (app) ->
 
-  app.get '/', (req, res) -> res.render 'index'
+  init: ->
+    @index()
 
-  app
+  index: ->
+    app.get '/', (req, res) ->
+      res.render 'index'

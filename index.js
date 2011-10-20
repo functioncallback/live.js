@@ -6,7 +6,6 @@
 
 require.paths.unshift(__dirname);
 require('coffee-script');
-
 require('lib/app').inject(
   require('express')
  ,require('stylus')
@@ -14,4 +13,4 @@ require('lib/app').inject(
  ,require('now')
  ,require('lib/routes')
  ,require('lib/sockets')
-);
+).init();

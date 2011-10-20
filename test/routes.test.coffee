@@ -1,15 +1,24 @@
-require.paths.unshift("#{__dirname}/..");
+#
+# live.js
+# Copyright(c) 2011 Wagner Montalvao Camarao <functioncallback@gmail.com>
+# MIT Licensed
+#
 
-it = module.exports
+require.paths.unshift("#{__dirname}/..");
+routes = app = null
 should = require 'should'
 $ = require 'mock.js'
 
-app = $.mock require('express').createServer()
+it = (statement, callback) ->
+  beforeEach()
+  module.exports[statement] = callback
 
-routes = require('lib/routes').inject(app)
+beforeEach = ->
+  app = $.mock require('express').createServer()
+  routes = require('lib/routes').inject app
 
+it 'should route index', ->
 
-
-it['should route to index page'] = ->
-
-  
+  expected = 'indexRoute'
+  $.when(app).get('/', $.any 'function').thenReturn expected
+  routes.index().should.equal expected

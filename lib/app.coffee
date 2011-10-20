@@ -1,29 +1,53 @@
+#
+# live.js
+# Copyright(c) 2011 Wagner Montalvao Camarao <functioncallback@gmail.com>
+# MIT Licensed
+#
+
+app = undefined
+root = (path) -> "#{__dirname}/..#{path}"
+
 module.exports = inject: (express, stylus, nib, nowjs, routes, sockets) ->
 
-  app = express.createServer()
-  root = (path) -> "#{__dirname}/..#{path}"
-  stylusCompiler = (str, path) ->
-    (((stylus str)
-    .set 'filename', path)
-    .use nib())
+  init: ->
+    @createServer()
+    @configure()
+    @envs()
+    @eject()
+    @listen()
+    app
 
-  app.configure ->
+  createServer: ->
+    app = express.createServer()
+
+  configure: ->
+    c = @
+    app.configure ->
+      c.use()
+      c.views()
+
+  use: ->
     app.use app.router
     app.use express.logger()
     app.use express.bodyParser()
     app.use express.cookieParser()
     app.use express.methodOverride()
-    app.use stylus.middleware src: root('/public'), compile: stylusCompiler
+    app.use stylus.middleware src: root('/public'), compile: (s, path) -> ((stylus s).set 'filename', path).use nib()
     app.use express.compiler src: root('/public'), enable: ['coffeescript']
     app.use express.static root '/public'
+
+  views: ->
     app.set 'views', root '/views'
     app.set 'view options', layout: false
     app.set 'view engine', 'jade'
 
-  app.configure 'development', -> app.use express.errorHandler dumpExceptions: true, showStack: true
-  app.configure 'production', -> app.use express.errorHandler()
+  envs: ->
+    app.configure 'development', -> app.use express.errorHandler dumpExceptions: true, showStack: true
+    app.configure 'production', -> app.use express.errorHandler()
 
-  routes.inject app
-  sockets.inject app, nowjs
-  app.listen process.env.app_port or 3000
-  app
+  eject: ->
+    routes.inject(app).init()
+    sockets.inject(app, nowjs).init()
+
+  listen: ->
+    app.listen process.env.app_port or 3000
