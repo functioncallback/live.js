@@ -5,20 +5,32 @@
 #
 
 require.paths.unshift("#{__dirname}/..");
-routes = app = null
+routes = app = events = null
 should = require 'should'
 $ = require 'mock.js'
 
 it = (statement, callback) ->
-  beforeEach()
-  module.exports[statement] = callback
+  module.exports[statement] = ->
+    beforeEach()
+    callback()
 
 beforeEach = ->
   app = $.mock require('express').createServer()
-  routes = require('lib/routes').inject app
+  events = $.mock require 'lib/events'
+  routes = require('lib/routes').inject app, events
 
-it 'should route index', ->
 
-  expected = 'indexRoute'
+
+it 'should route index page', ->
+
+  expected = 'index route'
   $.when(app).get('/', $.any 'function').thenReturn expected
   routes.index().should.equal expected
+
+
+
+it 'should route event update url', ->
+
+  expected = 'event route'
+  $.when(app).post('/event', $.any 'function').thenReturn expected
+  routes.event().should.equal expected
