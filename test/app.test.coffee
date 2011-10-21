@@ -6,22 +6,25 @@
 
 root = (path) -> "#{__dirname.substr(0, __dirname.length-5)}/lib/..#{path}"
 require.paths.unshift("#{__dirname}/..");
-app = express = expressApp = stylus = nib = nowjs = routes = sockets = null
+app = express = expressApp = stylus = nib = now = events = routes = sockets = watchers = null
 should = require 'should'
 $ = require 'mock.js'
 
 it = (statement, callback) ->
-  beforeEach()
-  module.exports[statement] = callback
+  module.exports[statement] = ->
+    beforeEach()
+    callback()
 
 beforeEach = ->
-  express = $.mock require 'express'
-  stylus  = $.mock require 'stylus'
-  nib     = $.mock require 'nib'
-  nowjs   = $.mock require 'now'
-  routes  = $.mock require 'lib/routes'
-  sockets = $.mock require 'lib/sockets'
-  app = require('lib/app').inject express, stylus, nib, nowjs, routes, sockets
+  express  = $.mock require 'express'
+  stylus   = $.mock require 'stylus'
+  nib      = $.mock require 'nib'
+  now      = $.mock require 'now'
+  events   = $.mock require 'lib/events'
+  routes   = $.mock require 'lib/routes'
+  sockets  = $.mock require 'lib/sockets'
+  watchers = ['watcher']
+  app = require('lib/app').inject express, stylus, nib, now, events, routes, sockets, watchers
   expressApp = stubExpressApp()
 
 stubExpressApp = ->
@@ -35,7 +38,7 @@ stubExpressApp = ->
 
 
 
-it 'should create app', ->
+it 'should create express app server', ->
 
   $.when(express).createServer().thenReturn expressApp
   app.createServer().should.be.equal expressApp
@@ -46,7 +49,9 @@ it 'should use middlewares', ->
 
   expressMiddlewares = ['logger', 'bodyParser', 'cookieParser', 'methodOverride', 'compiler', 'static']
   stylusMiddleware = 'stylus'
+  expressRouter = 'router'
 
+  expressApp.router = expressRouter
   $.when(express).createServer().thenReturn expressApp
   $.when(express)[m]().thenReturn m for m in expressMiddlewares
   $.when(stylus).middleware().thenReturn stylusMiddleware
@@ -56,6 +61,7 @@ it 'should use middlewares', ->
 
   expressApp.middlewares.should.contain m for m in expressMiddlewares
   expressApp.middlewares.should.contain stylusMiddleware
+  expressApp.middlewares.should.contain expressRouter
 
 
 
@@ -86,23 +92,51 @@ it 'should setup errorHandler by environment', ->
 
 
 
-it 'should eject dependencies', ->
+it 'should inject dependencies into events module', ->
 
   ejected = {}
-  initStub = {init: ->}
   $.when(express).createServer().thenReturn expressApp
-  $.when(routes).inject(expressApp).thenCall -> ejected.routesApp = expressApp; initStub
-  $.when(sockets).inject(expressApp, nowjs).thenCall ->
-    ejected.socketsApp = expressApp
-    ejected.socketsNowjs = nowjs
-    initStub
+  $.when(events).inject(watchers).thenCall ->
+    ejected.events = watchers: watchers
+    {init: ->}
 
   app.createServer()
-  app.eject()
+  app.events()
 
-  ejected.routesApp.should.be.equal expressApp
-  ejected.socketsApp.should.be.equal expressApp
-  ejected.socketsNowjs.should.be.equal nowjs
+  ejected.events.watchers.should.be.equal watchers
+
+
+
+it 'should inject dependencies into routes module', ->
+
+  ejected = {}
+  $.when(express).createServer().thenReturn expressApp
+  $.when(routes).inject(expressApp, events).thenCall ->
+    ejected = expressApp: expressApp, events: events
+    {init: ->}
+
+  app.createServer()
+  app.routes()
+
+  ejected.expressApp.should.be.equal expressApp
+  ejected.events.should.be.equal events
+
+
+
+it 'should inject dependencies into sockets module', ->
+
+  ejected = {}
+  $.when(express).createServer().thenReturn expressApp
+  $.when(sockets).inject(expressApp, now, watchers).thenCall ->
+    ejected = expressApp: expressApp, now: now, watchers: watchers
+    {init: ->}
+
+  app.createServer()
+  app.sockets()
+
+  ejected.expressApp.should.be.equal expressApp
+  ejected.now.should.be.equal now
+  ejected.watchers.should.be.equal watchers
 
 
 

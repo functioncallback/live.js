@@ -7,13 +7,15 @@
 app = undefined
 root = (path) -> "#{__dirname}/..#{path}"
 
-module.exports = inject: (express, stylus, nib, nowjs, routes, sockets) ->
+module.exports = inject: (express, stylus, nib, now, events, routes, sockets, watchers) ->
 
   init: ->
     @createServer()
     @configure()
     @envs()
-    @eject()
+    @events()
+    @routes()
+    @sockets()
     @listen()
     app
 
@@ -27,7 +29,6 @@ module.exports = inject: (express, stylus, nib, nowjs, routes, sockets) ->
       c.views()
 
   use: ->
-    app.use app.router
     app.use express.logger()
     app.use express.bodyParser()
     app.use express.cookieParser()
@@ -35,6 +36,7 @@ module.exports = inject: (express, stylus, nib, nowjs, routes, sockets) ->
     app.use stylus.middleware src: root('/public'), compile: (s, path) -> ((stylus s).set 'filename', path).use nib()
     app.use express.compiler src: root('/public'), enable: ['coffeescript']
     app.use express.static root '/public'
+    app.use app.router
 
   views: ->
     app.set 'views', root '/views'
@@ -45,9 +47,9 @@ module.exports = inject: (express, stylus, nib, nowjs, routes, sockets) ->
     app.configure 'development', -> app.use express.errorHandler dumpExceptions: true, showStack: true
     app.configure 'production', -> app.use express.errorHandler()
 
-  eject: ->
-    routes.inject(app).init()
-    sockets.inject(app, nowjs).init()
+  events: -> events.inject(watchers).init()
+  routes: -> routes.inject(app, events).init()
+  sockets: -> sockets.inject(app, now, watchers).init()
 
   listen: ->
     app.listen process.env.app_port or 3000
