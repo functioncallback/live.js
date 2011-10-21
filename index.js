@@ -11,6 +11,8 @@ require('lib/app').inject(
  ,require('stylus')
  ,require('nib')
  ,require('now')
+ ,require('lib/events')
  ,require('lib/routes')
  ,require('lib/sockets')
+ ,require('lib/watchers')
 ).init();
