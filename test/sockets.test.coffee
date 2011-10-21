@@ -5,21 +5,63 @@
 #
 
 require.paths.unshift("#{__dirname}/..");
-sockets = app = nowjs = null
+sockets = app = now = watchers = null
 should = require 'should'
 $ = require 'mock.js'
 
 it = (statement, callback) ->
-  beforeEach()
-  module.exports[statement] = callback
+  module.exports[statement] = ->
+    beforeEach()
+    callback()
 
 beforeEach = ->
   app = $.mock require('express').createServer()
-  nowjs = $.mock require('now')
-  sockets = require('lib/sockets').inject app, nowjs
+  now = $.mock require('now')
+  watchers = stubWatchers()
+  sockets = require('lib/sockets').inject app, now, watchers
 
-it 'should initialize nowjs', ->
+stubWatchers = ->
+  stub = []
+  stub.pull = (watcher) ->
+    stub.splice (stub.indexOf watcher), 1
+    stub.length
+  stub
+
+stubEveryone = (connections) ->
+  connected: (callback) -> callback()
+  disconnected: (callback) -> callback()
+  now: count: (n) -> connections.active = n
+
+
+
+it 'should setup sockets', ->
 
   expected = 'everyone'
-  $.when(nowjs).initialize(app, $.any 'object').thenReturn expected
-  sockets.initializeNowjs().should.equal expected
+  $.when(now).initialize(app, $.any 'object').thenReturn expected
+  sockets.setup().should.equal expected
+
+
+
+it 'should handle new connections', ->
+
+  connections = active: 0
+  everyone = stubEveryone(connections)
+  $.when(now).initialize(app, $.any 'object').thenReturn everyone
+
+  sockets.setup()
+  sockets.connected()
+
+  connections.active.should.be.equal 1
+
+
+
+it 'should handle disconnections', ->
+
+  connections = active: 1
+  everyone = stubEveryone(connections)
+  $.when(now).initialize(app, $.any 'object').thenReturn everyone
+
+  sockets.setup()
+  sockets.disconnected()
+
+  connections.active.should.be.equal 0
