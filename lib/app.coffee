@@ -4,10 +4,10 @@
 # MIT Licensed
 #
 
-app = undefined
-root = (path) -> "#{__dirname}/..#{path}"
-
 module.exports = inject: (express, stylus, nib, now, events, routes, sockets, watchers) ->
+
+  app = undefined
+  root = (path) -> "#{__dirname}/..#{path}"
 
   init: ->
     @createServer()

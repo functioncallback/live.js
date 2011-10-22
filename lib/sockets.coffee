@@ -4,9 +4,9 @@
 # MIT Licensed
 #
 
-everyone = undefined
-
 module.exports = inject: (app, now, watchers) ->
+
+  everyone = undefined
 
   init: ->
     @setup()

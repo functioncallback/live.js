@@ -4,11 +4,11 @@
 # MIT Licensed
 #
 
-events = {}
-
 module.exports = inject: (watchers) ->
 
   api = @
+  events = {}
+
   init: ->
     @schedule()
     api.update = @update
@@ -28,7 +28,7 @@ module.exports = inject: (watchers) ->
 
   update: (e) ->
     events[e.id] = events[e.id] or 0
-    events[e.id] += 1
+    events[e.id]++
 
   count: (id) ->
     events[id] or 0
