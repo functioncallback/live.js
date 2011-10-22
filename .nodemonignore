@@ -1,2 +1,11 @@
+.DS_Store
+.git
+.gitignore
+.monitor
+.npmignore
 public
+test
 views
+Makefile
+package.json
+Readme.md
