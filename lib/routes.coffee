@@ -16,5 +16,5 @@ module.exports = inject: (app, events) ->
 
   event: ->
     app.post '/event', (req, res) ->
-      events.update req.body
+      events.update req.body if req.body
       res.send ''
