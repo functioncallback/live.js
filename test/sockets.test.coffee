@@ -4,37 +4,18 @@
 # MIT Licensed
 #
 
-require.paths.unshift("#{__dirname}/..");
+$ = require('./support/tools').inject(module.exports)
 sockets = app = now = watchers = null
-should = require 'should'
-$ = require 'mock.js'
 
-it = (statement, callback) ->
-  module.exports[statement] = ->
-    beforeEach()
-    callback()
-
-beforeEach = ->
+$.before ->
   app = $.mock require('express').createServer()
   now = $.mock require('now')
-  watchers = stubWatchers()
-  sockets = require('lib/sockets').inject app, now, watchers
-
-stubWatchers = ->
-  stub = []
-  stub.pull = (watcher) ->
-    stub.splice (stub.indexOf watcher), 1
-    stub.length
-  stub
-
-stubEveryone = (connections) ->
-  connected: (callback) -> callback()
-  disconnected: (callback) -> callback()
-  now: count: (n) -> connections.active = n
+  watchers = $.stub.watchers()
+  sockets = require('../lib/sockets').inject app, now, watchers
 
 
 
-it 'should setup sockets', ->
+$.it 'should setup sockets', ->
 
   expected = 'everyone'
   $.when(now).initialize(app, $.any 'object').thenReturn expected
@@ -42,10 +23,10 @@ it 'should setup sockets', ->
 
 
 
-it 'should handle new connections', ->
+$.it 'should handle new connections', ->
 
   connections = active: 0
-  everyone = stubEveryone(connections)
+  everyone = $.stub.everyone(connections)
   $.when(now).initialize(app, $.any 'object').thenReturn everyone
 
   sockets.setup()
@@ -55,10 +36,10 @@ it 'should handle new connections', ->
 
 
 
-it 'should handle disconnections', ->
+$.it 'should handle disconnections', ->
 
   connections = active: 1
-  everyone = stubEveryone(connections)
+  everyone = $.stub.everyone(connections)
   $.when(now).initialize(app, $.any 'object').thenReturn everyone
 
   sockets.setup()

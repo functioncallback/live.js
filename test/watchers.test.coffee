@@ -4,39 +4,28 @@
 # MIT Licensed
 #
 
-require.paths.unshift("#{__dirname}/..");
+$ = require('./support/tools').inject(module.exports)
 watchers = null
-should = require 'should'
 
-it = (statement, callback) ->
-  module.exports[statement] = ->
-    beforeEach()
-    callback()
-
-beforeEach = ->
-  watchers = require 'lib/watchers'
+$.before ->
+  watchers = require '../lib/watchers'
   watchers.length = 0
 
-stubWatcher = ->
-  events: []
-  update: (e) ->
-    @events.push e
 
 
+$.it 'should pull out a given watcher and return the updated count', ->
 
-it 'should pull out a given watcher and return the updated count', ->
-
-  w = stubWatcher()
+  w = $.stub.watcher()
   watchers.push w
-  watchers.push stubWatcher()
+  watchers.push $.stub.watcher()
   watchers.pull(w).should.be.equal(1)
   watchers.should.not.contain(w)
 
 
 
-it 'should update watchers with a given event', ->
+$.it 'should update watchers with a given event', ->
 
   e = 'some event'
-  watchers.push stubWatcher() for n in [1..10]
+  watchers.push $.stub.watcher() for n in [1..10]
   watchers.update(e)
   w.events.should.contain(e) for w in watchers

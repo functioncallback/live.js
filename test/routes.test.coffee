@@ -4,24 +4,17 @@
 # MIT Licensed
 #
 
-require.paths.unshift("#{__dirname}/..");
+$ = require('./support/tools').inject(module.exports)
 routes = app = events = null
-should = require 'should'
-$ = require 'mock.js'
 
-it = (statement, callback) ->
-  module.exports[statement] = ->
-    beforeEach()
-    callback()
-
-beforeEach = ->
+$.before ->
   app = $.mock require('express').createServer()
-  events = $.mock require 'lib/events'
-  routes = require('lib/routes').inject app, events
+  events = $.mock require '../lib/events'
+  routes = require('../lib/routes').inject app, events
 
 
 
-it 'should route index page', ->
+$.it 'should route index page', ->
 
   expected = 'index route'
   $.when(app).get('/', $.any 'function').thenReturn expected
@@ -29,7 +22,7 @@ it 'should route index page', ->
 
 
 
-it 'should route event update url', ->
+$.it 'should route event update url', ->
 
   expected = 'event route'
   $.when(app).post('/event', $.any 'function').thenReturn expected
