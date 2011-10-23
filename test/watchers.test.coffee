@@ -4,7 +4,8 @@
 # MIT Licensed
 #
 
-$ = require('./support/tools').inject(module.exports)
+$ = require('cappuccino').inject(module.exports)
+stub = require './stubs/stub'
 watchers = null
 
 $.before ->
@@ -15,9 +16,9 @@ $.before ->
 
 $.it 'should pull out a given watcher and return the updated count', ->
 
-  w = $.stub.watcher()
+  w = stub.watcher()
   watchers.push w
-  watchers.push $.stub.watcher()
+  watchers.push stub.watcher()
   watchers.pull(w).should.be.equal(1)
   watchers.should.not.contain(w)
 
@@ -26,6 +27,6 @@ $.it 'should pull out a given watcher and return the updated count', ->
 $.it 'should update watchers with a given event', ->
 
   e = 'some event'
-  watchers.push $.stub.watcher() for n in [1..10]
+  watchers.push stub.watcher() for n in [1..10]
   watchers.update(e)
   w.events.should.contain(e) for w in watchers

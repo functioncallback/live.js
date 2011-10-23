@@ -4,7 +4,7 @@
 # MIT Licensed
 #
 
-$ = require('./support/tools').inject(module.exports)
+$ = require('cappuccino').inject(module.exports)
 events = watchers = null
 
 $.before ->

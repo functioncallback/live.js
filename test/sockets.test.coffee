@@ -4,13 +4,14 @@
 # MIT Licensed
 #
 
-$ = require('./support/tools').inject(module.exports)
+$ = require('cappuccino').inject(module.exports)
 sockets = app = now = watchers = null
+stub = require './stubs/stub'
 
 $.before ->
   app = $.mock require('express').createServer()
   now = $.mock require('now')
-  watchers = $.stub.watchers()
+  watchers = stub.watchers()
   sockets = require('../lib/sockets').inject app, now, watchers
 
 
@@ -26,7 +27,7 @@ $.it 'should setup sockets', ->
 $.it 'should handle new connections', ->
 
   connections = active: 0
-  everyone = $.stub.everyone(connections)
+  everyone = stub.everyone(connections)
   $.when(now).initialize(app, $.any 'object').thenReturn everyone
 
   sockets.setup()
@@ -39,7 +40,7 @@ $.it 'should handle new connections', ->
 $.it 'should handle disconnections', ->
 
   connections = active: 1
-  everyone = $.stub.everyone(connections)
+  everyone = stub.everyone(connections)
   $.when(now).initialize(app, $.any 'object').thenReturn everyone
 
   sockets.setup()

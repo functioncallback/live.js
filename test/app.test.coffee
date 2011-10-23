@@ -4,20 +4,22 @@
 # MIT Licensed
 #
 
-$ = require('./support/tools').inject(module.exports)
+$ = require('cappuccino').inject(module.exports)
 app = express = expressApp = stylus = nib = now = events = routes = sockets = watchers = null
+root = (path) -> "#{__dirname.substr(0, __dirname.length-5)}/lib/..#{path}"
+stub = require './stubs/stub'
 
 $.before ->
   express  = $.mock require 'express'
-  stylus   = $.mock require 'stylus'
-  nib      = $.mock require 'nib'
   now      = $.mock require 'now'
   events   = $.mock require '../lib/events'
   routes   = $.mock require '../lib/routes'
   sockets  = $.mock require '../lib/sockets'
+  stylus   = $.mock middleware: require('stylus').middleware
+  nib      = require 'nib'
   watchers = ['watcher']
   app = require('../lib/app').inject express, stylus, nib, now, events, routes, sockets, watchers
-  expressApp = $.stub.expressApp()
+  expressApp = stub.expressApp()
 
 
 
@@ -55,7 +57,7 @@ $.it 'should setup views', ->
   app.createServer()
   app.views()
 
-  expressApp.settings['views'].should.be.equal $.root '/views'
+  expressApp.settings['views'].should.be.equal root '/views'
   expressApp.settings['view options'].layout.should.be.false
   expressApp.settings['view engine'].should.be.equal 'jade'
 
