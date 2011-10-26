@@ -4,50 +4,83 @@
 # MIT Licensed
 #
 
-livechart = undefined
-Highcharts.setOptions global: useUTC: false
-now.count = (watchers) -> console.log "#{watchers} #{if watchers > 1 then 'people' else 'person'} watching"
-$(document).mousemove (e) -> $.post '/event', { id: 'live.js' }
 $(document).ready ->
 
-  livechart = new Highcharts.Chart(
+  count = 0
+  events = {}
+  selected = {}
+  title = $('#title')
+  container = $('#container')
+  navigation = $('#navigation')
+  Highcharts.setOptions global: useUTC: false
 
-    title: (text: 'live.js - real-time event visualization')
+  now.count = (watchers) ->
+    console.log "#{watchers} #{if watchers > 1 then 'people' else 'person'} watching"
 
-    chart:
-      renderTo: 'container'
-      defaultSeriesType: 'spline'
-      plotBackgroundImage: 'images/skies.jpg'
-      marginRight: 0
+  now.update = (event) ->
+    setup event.id unless events[event.id]?
+    events[event.id]?.update? event.x, event.y
 
-      events:
-        load: ->
-          series = @series[0];
-          now.update = (event) ->
-            series.addPoint [event.x, event.y], true, true
+  setup = (id) ->
 
-    xAxis:
-      type: 'datetime'
-      tickPixelInterval: 150
+    count++
+    livechart = events[id] = {}
+    livechart.container = $('<div>', { id: "container-#{count}", style: 'display: none' })
+    livechart.container.width $(window).width()
+    livechart.item = $('<div class="item">')
+    livechart.item.text id
 
-    yAxis:
+    livechart.item.click ->
+      title.fadeOut -> title.text id; title.fadeIn()
+      selected.container.fadeOut -> livechart.container.fadeIn()
+      selected.container = livechart.container
+
+    if not selected.container?
+      title.text id
+      selected.container = livechart.container
+      selected.container.fadeIn()
+
+    container.append livechart.container
+    navigation.append livechart.item
+
+    livechart.view = new Highcharts.Chart(
+
       title: (text: '')
-      plotLines: [
-        value: 0
-        width: 1
-        color: 'white'
+
+      chart:
+        renderTo: "container-#{count}"
+        defaultSeriesType: 'spline'
+        plotBackgroundImage: 'images/skies.jpg'
+        marginRight: 0
+
+        events:
+          load: ->
+            series = @series[0]
+            livechart.update = (x, y) ->
+              series.addPoint [x, y], true, true
+
+      xAxis:
+        type: 'datetime'
+        tickPixelInterval: 150
+
+      yAxis:
+        title: (text: '')
+        plotLines: [
+          value: 0
+          width: 1
+          color: 'white'
+        ]
+
+      tooltip: false
+      legend: (enabled: false)
+      exporting: (enabled: false)
+
+      series: [
+        data: (->
+          initial = []
+          initial.push(y:0, x:Date.now()+1000*n) for n in [-19..0]
+          initial
+        )()
       ]
-
-    tooltip: false
-    legend: (enabled: false)
-    exporting: (enabled: false)
-
-    series: [
-      data: (->
-        initial = []
-        initial.push(y:0, x:Date.now()+1000*n) for n in [-19..0]
-        initial
-      )()
-    ]
-  )
+    )
   undefined

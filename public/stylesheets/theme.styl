@@ -4,24 +4,31 @@
  * MIT Licensed
  */
 
+@import 'nib'
+
 *
-  font: 12pt Cantarell
+  color: gray
+  font: 12pt 'Cantarell'
+
+h1
+  font-size: 18pt
 
 body
   margin: 0
 
-#navigation
-  overflow-x: scroll
-  white-space: nowrap
-  width: 100%
+#title
+  text-align: center
 
-#navigation .first.item
-  margin-left: 10px
+#navigation
+  padding: 5px
 
 #navigation .item
-  border: 1px solid gray
+  background: linear-gradient(top, #eee, #ccc)
+  border-radius: 5px
   cursor: pointer
   display: inline-block
-  margin: 10px 10px 10px 0px
-  width: 160px
-  height: 120px
+  margin: 5px
+  padding: 7px 10px 10px 10px
+
+#navigation .item:hover
+  opacity: 0.9
