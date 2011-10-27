@@ -3,26 +3,26 @@
 <head>
   <title>mock live.js events</title>
   <script type="text/javascript" src="/javascripts/third-party/jquery.min.js"></script>
-</head>
-
-<body>
-  By clicking anywhere suddenly 5k users will fire random events
   <script type="text/javascript">
     $(function () {
       events = ['home page views', 'product views', 'category browse', 'product search', 'product put in cart', 'order placement']
       function random() {
-        var n = Math.round(Math.random()*50)
-          , i = n<25? 0: n<35? 1: n<40? 2: n<45? 3: n<48? 4:5;
+        var r = 50 * Math.random()
+          , i = r<25? 0: r<35? 1: r<40? 2: r<45? 3: r<48.5? 4:5;
         return events[i];
       }
       $(document).click(function () {
         for (var i=0; i<5; i++) $.post('/event', { id: events[i] });
         setInterval(function () {
-          for (var i=0; i<5000; i++) $.post('/event', { id: random() });
-        }, 5000);
+          for (var i=0; i<1500; i++) $.post('/event', { id: random() });
+        }, 1500);
       });
     });
   </script>
+</head>
+
+<body>
+  By clicking anywhere we will mock 1k random events per second
 </body>
 
 </html>

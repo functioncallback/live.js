@@ -4,46 +4,49 @@
 # MIT Licensed
 #
 
-$(document).ready ->
+$ ->
 
   count = 0
   events = {}
-  selected = {}
+  selected = undefined
   title = $('#title')
   container = $('#container')
   navigation = $('#navigation')
+  watchers = $('#watchers')
+  width = $(window).width()
   Highcharts.setOptions global: useUTC: false
 
-  now.count = (watchers) ->
-    console.log "#{watchers} #{if watchers > 1 then 'people' else 'person'} watching"
+  now.count = (n) ->
+    watchers.text "#{if n > 1 then "#{n} people" else 'you\'re the only one'} watching"
 
-  now.update = (event) ->
-    setup event.id unless events[event.id]?
-    events[event.id]?.update? event.x, event.y
+  now.update = (e) ->
+    event = events[e.id]
+    setup e.id unless event?
+    event?.update? e.x, e.y
 
   setup = (id) ->
 
     count++
-    livechart = events[id] = {}
-    livechart.container = $('<div>', { id: "container-#{count}", style: 'display: none' })
-    livechart.container.width $(window).width()
-    livechart.item = $('<div class="item">')
-    livechart.item.text id
+    event = events[id] = {}
+    event.container = $('<div>', { id: "container-#{count}", style: 'display: none' })
+    event.container.width width
+    event.item = $('<div class="item">')
+    event.item.text id
 
-    livechart.item.click ->
+    event.item.click ->
       title.fadeOut -> title.text id; title.fadeIn()
-      selected.container.fadeOut -> livechart.container.fadeIn()
-      selected.container = livechart.container
+      selected.fadeOut -> event.container.fadeIn()
+      selected = event.container
 
-    if not selected.container?
+    if not selected?
       title.text id
-      selected.container = livechart.container
-      selected.container.fadeIn()
+      selected = event.container
+      selected.fadeIn()
 
-    container.append livechart.container
-    navigation.append livechart.item
+    container.append event.container
+    navigation.append event.item
 
-    livechart.view = new Highcharts.Chart(
+    event.livechart = new Highcharts.Chart(
 
       title: (text: '')
 
@@ -56,7 +59,7 @@ $(document).ready ->
         events:
           load: ->
             series = @series[0]
-            livechart.update = (x, y) ->
+            event.update = (x, y) ->
               series.addPoint [x, y], true, true
 
       xAxis:
@@ -65,11 +68,7 @@ $(document).ready ->
 
       yAxis:
         title: (text: '')
-        plotLines: [
-          value: 0
-          width: 1
-          color: 'white'
-        ]
+        plotLines: [value: 0, width: 1, color: 'white']
 
       tooltip: false
       legend: (enabled: false)
