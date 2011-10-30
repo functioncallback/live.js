@@ -5,18 +5,12 @@
 #
 
 $ = require('cappuccino').inject(module.exports)
-stub = require './support/stub'
-root = stub.root
-
 routes = app = events = null
 
-
-
 $.before ->
-
   app = $.mock require('express').createServer()
-  events = $.mock require root '/lib/events'
-  routes = require(root '/lib/routes').inject app, events
+  events = $.mock require '../lib/events'
+  routes = require('../lib/routes').inject app, events
 
 
 

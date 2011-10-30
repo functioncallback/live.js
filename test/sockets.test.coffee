@@ -5,19 +5,14 @@
 #
 
 $ = require('cappuccino').inject(module.exports)
-stub = require './support/stub'
-root = stub.root
-
 sockets = app = now = watchers = null
-
-
+stub = require './stubs/stub'
 
 $.before ->
-
   app = $.mock require('express').createServer()
   now = $.mock require('now')
   watchers = stub.watchers()
-  sockets = require(root '/lib/sockets').inject app, now, watchers
+  sockets = require('../lib/sockets').inject app, now, watchers
 
 
 

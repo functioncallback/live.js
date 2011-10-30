@@ -12,6 +12,7 @@
     "test": "make test"
    ,"start": "nodemon index.js"
   }
+ ,"main": "index.js"
  ,"engines": {
     "node": "0.4.x"
   }
@@ -29,5 +30,4 @@
    ,"underscore"    : "1.2.x"
  }
  ,"devDependencies": {}
- ,"main": "index.js"
 }

@@ -5,25 +5,21 @@
 #
 
 $ = require('cappuccino').inject(module.exports)
-stub = require './support/stub'
-root = stub.root
-
 app = express = expressApp = stylus = nib = now = events = routes = sockets = watchers = null
-
-
+root = (path) -> "#{__dirname.substr(0, __dirname.length-5)}/lib/..#{path}"
+stub = require './stubs/stub'
 
 $.before ->
-
-  expressApp = stub.expressApp()
-  events   = $.mock require root '/lib/events'
-  routes   = $.mock require root '/lib/routes'
-  sockets  = $.mock require root '/lib/sockets'
   express  = $.mock require 'express'
   now      = $.mock require 'now'
+  events   = $.mock require '../lib/events'
+  routes   = $.mock require '../lib/routes'
+  sockets  = $.mock require '../lib/sockets'
   stylus   = $.mock middleware: require('stylus').middleware
   nib      = require 'nib'
-  watchers = ['one']
-  app = require(root '/lib/app').inject express, stylus, nib, now, events, routes, sockets, watchers
+  watchers = ['watcher']
+  app = require('../lib/app').inject express, stylus, nib, now, events, routes, sockets, watchers
+  expressApp = stub.expressApp()
 
 
 
