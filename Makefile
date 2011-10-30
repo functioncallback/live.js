@@ -1,6 +1,6 @@
 test:
 
 	@./node_modules/.bin/expresso \
-	$(shell find test -name "*.test.coffee" -type f)
+	$(shell find testing/unit -name "*.test.coffee" -type f)
 
 .PHONY: test
