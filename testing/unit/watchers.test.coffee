@@ -5,11 +5,16 @@
 #
 
 $ = require('cappuccino').inject(module.exports)
-stub = require './stubs/stub'
+stub = require './support/stub'
+root = stub.root
+
 watchers = null
 
+
+
 $.before ->
-  watchers = require '../lib/watchers'
+
+  watchers = require root '/lib/watchers'
   watchers.length = 0
 
 
