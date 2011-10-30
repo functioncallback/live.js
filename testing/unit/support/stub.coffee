@@ -6,6 +6,10 @@
 
 module.exports =
 
+  root: (path) ->
+    cut = '/testing/unit/support'
+    "#{__dirname.substr(0, __dirname.length-cut.length)+'/lib/..'+path}"
+
   expressApp: ->
     middlewares: []
     settings: {}

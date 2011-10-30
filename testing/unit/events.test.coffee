@@ -5,11 +5,17 @@
 #
 
 $ = require('cappuccino').inject(module.exports)
+stub = require './support/stub'
+root = stub.root
+
 events = watchers = null
 
+
+
 $.before ->
-  watchers = $.mock require '../lib/watchers'
-  events = require('../lib/events').inject watchers
+
+  watchers = $.mock require root '/lib/watchers'
+  events = require(root '/lib/events').inject watchers
   events.purge()
 
 
