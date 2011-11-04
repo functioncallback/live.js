@@ -1,7 +1,11 @@
 .DS_Store
+.bundle
 .git
 .gitignore
 .monitor
 .nodemonignore
-Makefile
-test
+npm-debug.log
+Gemfile
+Gemfile.lock
+Rakefile
+spec
