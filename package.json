@@ -9,7 +9,7 @@
    ,"url": "git://github.com/functioncallback/live.js.git"
   }
  ,"scripts": {
-    "test": "make test"
+    "test": "rake"
    ,"start": "nodemon index.js"
   }
  ,"engines": {
@@ -19,15 +19,13 @@
     "cappuccino"    : "0.0.x"
    ,"coffee-script" : "1.1.x"
    ,"express"       : "2.4.x"
-   ,"expresso"      : "0.9.x"
    ,"jade"          : "0.16.x"
    ,"nib"           : "0.2.x"
-   ,"nodemon"       : "0.5.x"
    ,"now"           : "0.7.x"
-   ,"should"        : "0.3.x"
    ,"stylus"        : "0.17.x"
-   ,"underscore"    : "1.2.x"
  }
- ,"devDependencies": {}
+ ,"devDependencies": {
+   "nodemon"       : "0.5.x"
+ }
  ,"main": "index.js"
 }
