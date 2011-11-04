@@ -1,0 +1,7 @@
+#!/bin/bash
+
+GEMS=`gem list --no-versions`
+
+for g in $GEMS; do
+  gem uninstall $g
+done
